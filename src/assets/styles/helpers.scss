@@ -1,0 +1,60 @@
+$margin-helpers: 0, 5, 10, 15, 20, 25, 30, 35, 40;
+
+@each $val in $margin-helpers {
+  .mt#{$val} {
+    margin-top: #{$val}px !important;
+  }
+  .mb#{$val} {
+    margin-bottom: #{$val}px !important;
+  }
+  .mr#{$val} {
+    margin-right: #{$val}px !important;
+  }
+  .ml#{$val} {
+    margin-left: #{$val}px !important;
+  }
+}
+
+.w-full {
+  width: 100%;
+}
+
+@mixin custom-scroll(
+  $width: 5px,
+  $border-radius: 16px,
+  $thumb-color: #a6a6a6,
+  $track-color: #eaeaea
+) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+    &-thumb {
+      border-radius: $border-radius;
+      background-color: $thumb-color;
+    }
+    &-track {
+      border-radius: $border-radius;
+      background-color: $track-color;
+    }
+  }
+  scrollbar-width: thin;
+  scrollbar-color: $thumb-color $track-color;
+}
+
+@mixin hidden-scroll() {
+  &::-webkit-scrollbar {
+    width: 0;
+  }
+  scrollbar-width: none;
+}
+
+@mixin smooth-hover(
+  $property: color,
+  $hover-color: $primary-hover,
+  $transition-delay: 0.2s
+) {
+  transition: $property $transition-delay;
+  &:hover {
+    #{$property}: $hover-color;
+  }
+}

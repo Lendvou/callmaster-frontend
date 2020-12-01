@@ -1,0 +1,30 @@
+{
+	"env": {
+		"node": true,
+		"es6": true,
+		"amd": true,
+		"browser": true,
+		"jest": true
+	},
+	"settings": {
+		"import/resolver": {
+			"node": {
+				"moduleDirectory": ["node_modules", "src/"]
+			}
+		},
+		"react": {
+			"createClass": "createReactClass",
+			"pragma": "React",
+			"version": "detect"
+		}
+	},
+	"extends": ["eslint:recommended", "react-app"],
+	"rules": {
+		"no-unused-vars": [
+			"warn",
+			{ "vars": "all", "args": "after-used", "ignoreRestSiblings": false }
+		],
+		"no-console": ["warn", { "allow": ["error", "info"] }],
+		"no-debugger": "warn"
+	}
+}

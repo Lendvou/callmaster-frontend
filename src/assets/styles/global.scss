@@ -1,0 +1,260 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  color: $gray;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.page-loading {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &::after {
+    background-image: url('../images/messenger-image.jpg');
+    background-size: 14%;
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    content: '';
+    opacity: 0.25;
+  }
+
+  &__settings-icon {
+    position: absolute;
+    right: 40px;
+    top: 40px;
+    transform: scale(2);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 100px;
+    background-color: white;
+    box-shadow: 0px 0px 30px 0px rgba(195, 199, 220, 0.6);
+    svg {
+      width: 10px;
+      height: auto;
+    }
+    &:hover {
+      background-color: $pale;
+      box-shadow: 0px 0px 30px 0px rgba(195, 199, 220, 1);
+      path {
+        fill: black;
+      }
+    }
+  }
+}
+
+// global things
+
+.field-with-validation {
+  width: 100%;
+  position: relative;
+  &--invalid {
+    .ant-input {
+      border-color: red;
+    }
+    .ant-input-password {
+      border-color: red;
+    }
+  }
+  &__error-text {
+    position: absolute;
+    top: -18px;
+    left: 0px;
+    color: red;
+    font-size: 13px;
+    margin-left: 4px;
+  }
+}
+
+.ant-input {
+  color: $gray !important;
+  border-color: #ccd4d8;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 15px;
+  resize: none;
+
+  &:hover {
+    border-color: #808080;
+  }
+  &:focus {
+    box-shadow: none;
+    border-color: $primary-active;
+  }
+  &::placeholder {
+    color: #99a8b1;
+  }
+}
+
+.ant-input-password {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: text;
+
+  &:hover {
+    border-color: #808080;
+  }
+  &.ant-input-affix-wrapper-focused {
+    box-shadow: none;
+    border-color: $primary-active;
+  }
+}
+
+.ant-btn {
+  border-radius: 6px;
+  text-transform: uppercase;
+  // font-family: 'plex bold';
+  font-weight: bold;
+  font-size: 13px;
+  color: $primary;
+  height: 2.6em;
+  // height: 34px;
+
+  &:hover {
+    color: $primary-hover;
+    border-color: $primary-hover;
+  }
+  &.ant-btn-primary {
+    color: white;
+    border: none;
+    background-color: $primary;
+    &:hover {
+      background-color: $primary-hover;
+    }
+  }
+  &.ant-btn-dangerous {
+    background-color: $danger;
+    &:hover {
+      background-color: $danger-hover;
+    }
+  }
+
+  &[disabled] {
+    color: white;
+    background-color: $light-gray;
+    &:hover {
+      color: white;
+      background-color: $light-gray;
+    }
+  }
+}
+
+// AUTH ----------------------
+
+.auth-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  width: 100%;
+  height: 100vh;
+
+  &__container {
+    width: 340px;
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  &__title {
+    font-size: 24px;
+    // font-family: 'plex medium';
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  &__info {
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 14px;
+    width: 80%;
+    align-self: center;
+  }
+  &__error {
+    margin-bottom: 20px;
+    color: red;
+    text-align: center;
+  }
+  &__fields {
+    margin-bottom: 40px;
+    > div {
+      &:not(:last-child) {
+        margin-bottom: 30px;
+      }
+    }
+  }
+  &__forgot {
+    align-self: center;
+    font-size: 12px;
+    font-weight: bold;
+    // font-family: 'plex bold';
+    text-align: center;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    color: $primary;
+    @include smooth-hover;
+  }
+  &__button {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 30px;
+    font-size: 14px;
+  }
+  &__footer-text {
+    font-size: 14px;
+    text-align: center;
+    a {
+      // font-family: 'plex medium';
+      color: $primary;
+      @include smooth-hover;
+    }
+  }
+
+  &__check-icon,
+  &__close-icon {
+    align-self: center;
+    margin-bottom: 30px;
+    width: 100px;
+    height: auto;
+  }
+  &__check-icon {
+    path,
+    circle {
+      stroke: $primary;
+    }
+  }
+
+  &--login {
+    .auth-form__fields {
+      margin-bottom: 30px;
+    }
+  }
+
+  &--verify {
+    .auth-form__error {
+      margin-bottom: 30px;
+    }
+  }
+}
