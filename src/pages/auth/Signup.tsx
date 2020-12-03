@@ -30,7 +30,7 @@ const Signup = () => {
 
     try {
       await apiClient.service('users').create(data);
-      history.push('/login');
+      history.push('/login?from=client');
     } catch (e) {
       console.log('err', e);
       return { [FORM_ERROR]: e.message };

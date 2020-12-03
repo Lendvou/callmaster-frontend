@@ -23,7 +23,7 @@ const Login = () => {
       });
       setAuthData({ user, accessToken });
 
-      history.push('/');
+      history.push('/chat?from=client');
     } catch (e) {
       return { [FORM_ERROR]: e.message };
     }

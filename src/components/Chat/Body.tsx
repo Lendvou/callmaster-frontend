@@ -1,25 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Avatar, Input } from 'antd';
+import { Avatar, Divider, Input } from 'antd';
 import moment from 'moment';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import ReactLoading from 'react-loading';
 import clsx from 'clsx';
-import { CheckOutlined, PhoneOutlined, SendOutlined } from '@ant-design/icons';
+import {
+  CheckOutlined,
+  PhoneOutlined,
+  SendOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
 
 import apiClient from 'utils/apiClient';
-import { getUser } from 'utils';
+import { getReceiver, getUser } from 'utils';
 
 import { Paginated } from '@feathersjs/feathers';
-import { IChat, IMessage } from 'types';
+import { IChat, IMessage, IUpload } from 'types';
+import UploadFile from 'components/UploadFile';
 
 type Props = {
   activeChat: Partial<IChat>;
+  onNewMessageAdded: (message: IMessage) => void;
 };
 
-const Body: React.FC<Props> = ({ activeChat }) => {
+const Body: React.FC<Props> = ({ activeChat, onNewMessageAdded }) => {
   const inputRef = useRef<Input>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputVal, setInputVal] = useState<string>('');
   const [hasMore, setHasMore] = useState<boolean>(false);
@@ -30,6 +36,7 @@ const Body: React.FC<Props> = ({ activeChat }) => {
       $limit: 20,
       $skip: messages.length,
       $sort: { createdAt: -1 },
+      $read: true,
     };
 
     const result: Paginated<IMessage> = await apiClient
@@ -38,7 +45,6 @@ const Body: React.FC<Props> = ({ activeChat }) => {
 
     const newMessages = result.data.reverse().concat(messages);
     setMessages(newMessages);
-    console.log('newmess', newMessages.length, result.total);
 
     if (newMessages.length >= result.total) {
       setHasMore(false);
@@ -72,6 +78,35 @@ const Body: React.FC<Props> = ({ activeChat }) => {
     }
   };
 
+  const checkIfDividerIsNeeded = (
+    message: IMessage,
+    index: number
+  ): boolean => {
+    return (
+      !!messages[index + 1] &&
+      !moment(messages[index + 1].createdAt).isSame(
+        moment(message.createdAt),
+        'day'
+      )
+    );
+  };
+
+  const createPhotoMessage = async (uploads: IUpload[]) => {
+    const user = getUser();
+    try {
+      await apiClient.service('messages').create({
+        type: 'photo',
+        photosIds: uploads.map((el) => el._id),
+        authorRole: user.role,
+        chatId: activeChat._id,
+        userId: user._id,
+      });
+      setIsModalVisible(false);
+    } catch (e) {
+      console.error('photo error', e);
+    }
+  };
+
   useEffect(() => {
     const receiveMessage = (message: IMessage) => {
       const user = getUser();
@@ -89,13 +124,16 @@ const Body: React.FC<Props> = ({ activeChat }) => {
     };
 
     apiClient.service('messages').on('created', (message: IMessage) => {
-      receiveMessage(message);
+      if (activeChat._id) {
+        receiveMessage(message);
+      }
+      onNewMessageAdded(message);
     });
 
     return () => {
       apiClient.service('messages').removeListener('created');
     };
-  }, [messages]);
+  }, [messages, activeChat, onNewMessageAdded]);
 
   useEffect(() => {
     if (activeChat?._id) {
@@ -105,6 +143,7 @@ const Body: React.FC<Props> = ({ activeChat }) => {
           $limit: 20,
           $skip: 0,
           $sort: { createdAt: -1 },
+          $read: true,
         };
         const result: Paginated<IMessage> = await apiClient
           .service('messages')
@@ -117,6 +156,15 @@ const Body: React.FC<Props> = ({ activeChat }) => {
 
         inputRef.current?.focus();
         listRef.current!.scrollTop = listRef.current!.scrollHeight;
+
+        setTimeout(() => {
+          if (
+            listRef.current!.scrollTop + listRef.current!.clientHeight !==
+            listRef.current!.scrollHeight
+          ) {
+            listRef.current!.scrollTop = listRef.current!.scrollHeight;
+          }
+        }, 100);
       };
 
       fetchChatMessages();
@@ -131,7 +179,8 @@ const Body: React.FC<Props> = ({ activeChat }) => {
             <div className="chat__navbar__left">
               <Avatar className="chat__navbar__avatar" />
               <div className="chat__navbar__name">
-                {activeChat.user?.firstName} {activeChat.user?.lastName}
+                {activeChat[getReceiver()]?.firstName}{' '}
+                {activeChat[getReceiver()]?.lastName}
               </div>
             </div>
             <PhoneOutlined className="chat__navbar__phone" />
@@ -143,17 +192,29 @@ const Body: React.FC<Props> = ({ activeChat }) => {
             id="scrollableList"
             onScroll={onListScroll}
           >
-            {messages.map((message, index) => {
-              return (
+            {messages.map((message, index) => (
+              <div key={message._id}>
                 <div
-                  key={message._id}
                   className={clsx('chat-message', {
                     'chat-message--yours': message.userId === getUser()._id,
                     'chat-message--his': message.userId !== getUser()._id,
                   })}
                 >
                   <div className="chat-message__wrapper">
-                    <div className="chat-message__text">{message.text}</div>
+                    {message.type === 'text' && (
+                      <div className="chat-message__text">{message.text}</div>
+                    )}
+                    {message.type === 'photo' && (
+                      <div className="chat-message__photo">
+                        {message.photos.map((photo) => (
+                          <img
+                            key={photo._id}
+                            src={photo.path}
+                            alt="foto path"
+                          />
+                        ))}
+                      </div>
+                    )}
                     <div className="chat-message__info">
                       <div className="chat-message__time">
                         {moment(message.createdAt).format('HH:mm')}
@@ -171,53 +232,21 @@ const Body: React.FC<Props> = ({ activeChat }) => {
                     </div>
                   </div>
                 </div>
-              );
-            })}
-            {/* <InfiniteScroll
-              dataLength={messages.length}
-              next={fetchNewMessages}
-              hasMore={hasMore}
-              loader={<span />}
-              // loader={<ReactLoading type="bars" color="#69C262" width="40px" />}
-              scrollableTarget="scrollableList"
-              inverse
-              scrollThreshold={'200px'}
-              // scrollThreshold={0.7}
-            >
-              {messages.map((message, index) => {
-                return (
-                  <div
-                    key={message._id}
-                    className={clsx('chat-message', {
-                      'chat-message--yours': message.userId === getUser()._id,
-                      'chat-message--his': message.userId !== getUser()._id,
-                    })}
-                  >
-                    <div className="chat-message__wrapper">
-                      <div className="chat-message__text">{message.text}</div>
-                      <div className="chat-message__info">
-                        <div className="chat-message__time">
-                          {moment(message.createdAt).format('HH:mm')}
-                        </div>
-                        <div className="chat-message__received">
-                          {message.isRead ? (
-                            <div className="chat-message__received-double">
-                              <CheckOutlined />
-                              <CheckOutlined />
-                            </div>
-                          ) : (
-                            <CheckOutlined />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </InfiniteScroll> */}
+
+                {checkIfDividerIsNeeded(message, index) && (
+                  <Divider>
+                    {moment(messages[index + 1].createdAt).format('DD.MM.YYYY')}
+                  </Divider>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="chat__inputs">
+            <UploadOutlined
+              className="chat__input-upload"
+              onClick={() => setIsModalVisible(true)}
+            />
             <Input
               ref={inputRef}
               className="chat__input-field"
@@ -236,6 +265,12 @@ const Body: React.FC<Props> = ({ activeChat }) => {
           <div className="chat__select-chat-text">Выберите чат</div>
         </div>
       )}
+
+      <UploadFile
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        onOk={createPhotoMessage}
+      />
     </div>
   );
 };

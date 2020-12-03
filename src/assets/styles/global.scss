@@ -2,13 +2,13 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  transition: background-color 0.2s;
 }
 
 body {
   margin: 0;
   width: 100vw;
   height: 100vh;
-  color: $gray;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -26,6 +26,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: var(--main-bg-color);
+  transition: background-color 0.2s;
 
   &::after {
     background-image: url('../images/messenger-image.jpg');
@@ -38,6 +40,12 @@ body {
     right: 0;
     content: '';
     opacity: 0.25;
+  }
+
+  > button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
   }
 
   &__settings-icon {
@@ -127,20 +135,20 @@ body {
   // font-family: 'plex bold';
   font-weight: bold;
   font-size: 13px;
-  color: $primary;
+  color: var(--primary);
   height: 2.6em;
   // height: 34px;
 
   &:hover {
-    color: $primary-hover;
-    border-color: $primary-hover;
+    color: var(--primary-hover);
+    border-color: var(--primary-hover);
   }
   &.ant-btn-primary {
     color: white;
     border: none;
-    background-color: $primary;
+    background-color: var(--primary);
     &:hover {
-      background-color: $primary-hover;
+      background-color: var(--primary-hover);
     }
   }
   &.ant-btn-dangerous {
@@ -213,7 +221,7 @@ body {
     cursor: pointer;
     text-transform: uppercase;
     margin-bottom: 30px;
-    color: $primary;
+    color: var(--primary);
     @include smooth-hover;
   }
   &__button {
@@ -227,7 +235,7 @@ body {
     text-align: center;
     a {
       // font-family: 'plex medium';
-      color: $primary;
+      color: var(--primary);
       @include smooth-hover;
     }
   }
@@ -242,7 +250,7 @@ body {
   &__check-icon {
     path,
     circle {
-      stroke: $primary;
+      stroke: var(--primary);
     }
   }
 
@@ -256,5 +264,33 @@ body {
     .auth-form__error {
       margin-bottom: 30px;
     }
+  }
+}
+
+.drawer {
+  .ant-drawer-wrapper-body,
+  .ant-drawer-header {
+    background-color: var(--drawer-bg);
+    color: var(--color) !important;
+  }
+  .ant-drawer-title {
+    color: var(--color) !important;
+  }
+  .ant-drawer-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &__logout,
+  &__color-mode {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+  }
+  svg {
+    margin-left: 10px;
+    width: 40px;
+    height: auto;
   }
 }

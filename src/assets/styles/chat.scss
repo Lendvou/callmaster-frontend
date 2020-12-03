@@ -1,21 +1,44 @@
 .chat {
-  width: 75%;
-  height: 80%;
-  background-color: white;
+  width: 80%;
+  height: 85%;
+  // background-color: white;
   border-radius: 6px;
-  border: 2px solid white;
+  // border: 2px solid $gray;
   display: flex;
-  box-shadow: 0px 0px 30px 0px rgba(195, 199, 220, 0.6);
+  box-shadow: 0px 0px 30px 0px rgba(195, 199, 220, 0.26);
+  color: var(--color);
+  background-color: var(--chat-bg-color);
+  transition: background-color 0.2s;
 
   &__side {
     width: 30%;
     height: 100%;
     border-right: 1px solid #e7e7e7;
-    box-shadow: 6px 0px 30px 0px rgba(#c3c7dc, 0.26);
+    // box-shadow: 6px 0px 30px 0px rgba(#c3c7dc, 0.26);
   }
   &__side-search {
-    height: 64px;
+    height: 70px;
     border-bottom: 1px solid #e7e7e7;
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+
+    .ant-avatar {
+      min-width: 50px;
+      height: 50px;
+      border: 2px solid white;
+      margin-right: 10px;
+      // height: auto;
+    }
+  }
+  &__title {
+    margin: 10px 15px;
+    color: var(--color);
+  }
+  &__side-items {
+    overflow-y: auto;
+    height: calc(100% - 33px - 70px - 20px);
+    @include custom-scroll;
   }
   &__box {
     padding: 14px 12px;
@@ -26,10 +49,10 @@
     cursor: pointer;
     transition: background-color 0.1s;
     &:hover {
-      background-color: #f3f3f3;
+      background-color: var(--chat-bg-hover);
     }
     &--active {
-      background-color: #5aaef2 !important;
+      background-color: var(--primary) !important;
       color: white;
       .ant-avatar {
         background-color: white;
@@ -54,6 +77,9 @@
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
+      & > span {
+        margin-right: 6px;
+      }
     }
     &__center {
       width: 70%;
@@ -78,10 +104,13 @@
   }
 
   &__body {
+    border-top-right-radius: 6px;
     width: 70%;
     height: 100%;
     background-image: url(../images/chat-bg.svg);
-    background-color: #e3eef6;
+    background-color: var(--chat-bg-hover);
+    border-bottom-right-radius: 6px;
+    // background-color: #e3eef6;
   }
 
   &__select-chat {
@@ -106,17 +135,20 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
   }
 
   &__navbar {
-    min-height: 64px;
+    min-height: 70px;
     width: 100%;
-    background-color: white;
+    background-color: var(--chat-bg-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding-left: 20px;
-    box-shadow: 0px 6px 30px 0px rgba(#c3c7dc, 0.26);
+    // box-shadow: 0px 6px 30px 0px rgba(#c3c7dc, 0.26);
+    border-top-right-radius: 6px;
     &__left {
       display: flex;
       align-items: center;
@@ -157,10 +189,11 @@
   }
 
   &__inputs {
-    background-color: white;
+    background-color: var(--chat-bg-color);
     display: flex;
     padding: 10px 12px;
     align-items: center;
+    border-bottom-right-radius: 6px;
   }
   &__input-send {
     margin-left: 15px;
@@ -178,9 +211,27 @@
       }
     }
   }
+  &__input-upload {
+    margin-left: 5px;
+    svg {
+      width: 24px;
+      height: auto;
+      margin-right: 15px;
+    }
+    path {
+      fill: $gray;
+      transition: fill 0.14s;
+    }
+    &:hover {
+      path {
+        fill: $black;
+      }
+    }
+  }
 }
 
 .chat-message {
+  margin-bottom: 10px;
   display: flex;
   justify-content: flex-start;
   &--yours {
@@ -205,7 +256,7 @@
   }
 
   &__text {
-    background-color: #5aaef2;
+    background-color: var(--primary);
     color: white;
     padding: 10px 14px;
     border-radius: 6px;
@@ -234,4 +285,26 @@
       }
     }
   }
+
+  &__photo {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    padding: 10px;
+    border-radius: 6px;
+    img {
+      width: 100%;
+      height: auto;
+      &:not(:last-child) {
+        margin-bottom: 6px;
+      }
+    }
+  }
+}
+
+.ant-divider-inner-text {
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  color: $gray;
 }

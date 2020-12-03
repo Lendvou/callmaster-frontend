@@ -20,10 +20,10 @@ $margin-helpers: 0, 5, 10, 15, 20, 25, 30, 35, 40;
 }
 
 @mixin custom-scroll(
-  $width: 5px,
-  $border-radius: 16px,
+  $width: 6px,
+  $border-radius: 1px,
   $thumb-color: #a6a6a6,
-  $track-color: #eaeaea
+  $track-color: transparent
 ) {
   &::-webkit-scrollbar {
     width: $width;
@@ -50,7 +50,7 @@ $margin-helpers: 0, 5, 10, 15, 20, 25, 30, 35, 40;
 
 @mixin smooth-hover(
   $property: color,
-  $hover-color: $primary-hover,
+  $hover-color: var(--primary-hover),
   $transition-delay: 0.2s
 ) {
   transition: $property $transition-delay;

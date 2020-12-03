@@ -4,7 +4,11 @@ export interface IChat {
   operatorId: string;
   lastMessageId: string;
   lastMessage: Message;
-  user: Partial<IUser>;
+  lastMessageDate: Date;
+  clientUnreadMessages: number;
+  operatorUnreadMessages: number;
+  client: Partial<IUser>;
+  operator: Partial<IUser>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +29,7 @@ export interface IMessage {
 }
 
 export interface IUpload {
+  _id: string;
   originalname: string;
   filename: string;
   mimetype?: string;

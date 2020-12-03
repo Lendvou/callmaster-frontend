@@ -1,12 +1,14 @@
 import { Paginated } from '@feathersjs/feathers';
+import { Input } from 'antd';
 import Avatar from 'antd/lib/avatar/avatar';
 import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
+import moment from 'moment';
+import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ReactLoading from 'react-loading';
 
 import { IChat } from 'types';
-import { getUser } from 'utils';
+import { getReceiver, getUser } from 'utils';
 import apiClient from 'utils/apiClient';
 
 type Props = {
@@ -23,17 +25,46 @@ const Side: React.FC<Props> = ({
   onChatClick,
 }) => {
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>('');
+
+  const filteredChats = useMemo(() => {
+    if (!search) return chats;
+    return chats.filter(
+      (chat) =>
+        chat[getReceiver()]?.firstName
+          ?.toLowerCase()
+          .includes(search.toLowerCase()) ||
+        chat[getReceiver()]?.lastName
+          ?.toLowerCase()
+          .includes(search.toLowerCase())
+    );
+  }, [search, chats]);
+
+  const sortedChats = useMemo(() => {
+    return filteredChats.sort(
+      (a, b) =>
+        new Date(b.lastMessageDate).getTime() -
+        new Date(a.lastMessageDate).getTime()
+    );
+  }, [filteredChats]);
+
+  const getUnreadMessages = (chat: IChat) =>
+    chat[
+      (getUser().role + 'UnreadMessages') as
+        | 'clientUnreadMessages'
+        | 'operatorUnreadMessages'
+    ];
 
   const fetchNewChats = async () => {
     const user = getUser();
-
-    console.log('fetch new');
+    const field = user.role === 'client' ? 'clientId' : 'operatorId';
 
     const response: Paginated<IChat> = await apiClient.service('chats').find({
       query: {
-        userId: user._id,
+        [field]: user._id,
         $limit: 15,
         $skip: chats.length,
+        $search: search || undefined,
       },
     });
 
@@ -59,16 +90,24 @@ const Side: React.FC<Props> = ({
       });
 
       console.log('chats', response);
-
       setChats(response.data);
     };
 
     fetchChats();
+    // eslint-disable-next-line
   }, []);
 
   return (
     <div className="chat__side">
-      <div className="chat__side-search"></div>
+      <div className="chat__side-search">
+        <Avatar src={getUser().avatar?.path} />
+        <Input
+          placeholder="Поиск"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+      <h2 className="chat__title">Чаты</h2>
       <div className="chat__side-items" id="scrollableContainer">
         <InfiniteScroll
           dataLength={chats.length}
@@ -77,31 +116,45 @@ const Side: React.FC<Props> = ({
           loader={<ReactLoading type="bars" color="#69C262" width="40px" />}
           scrollableTarget="scrollableContainer"
         >
-          {chats.map((chat) => (
-            <div
-              key={chat._id}
-              className={clsx('chat__box', {
-                'chat__box--active': chat._id === activeChat._id,
-              })}
-              onClick={() => onChatClick(chat)}
-            >
-              <div className="chat__box__left">
-                <Avatar />
-              </div>
-              <div className="chat__box__center">
-                <div className="chat__box__name">
-                  {chat.user.firstName} {chat.user.lastName}
+          {sortedChats.map((chat) => {
+            return (
+              <div
+                key={chat._id}
+                className={clsx('chat__box', {
+                  'chat__box--active': chat._id === activeChat._id,
+                })}
+                onClick={() => onChatClick(chat)}
+              >
+                <div className="chat__box__left">
+                  <Avatar src={chat[getReceiver()]?.avatar?.path} />
                 </div>
-                <div className="chat__box__last-message">
-                  потом фидбек дай да по цене, чтобы я мог поиметь % нфтм
+                <div className="chat__box__center">
+                  <div className="chat__box__name">
+                    {chat[getReceiver()]?.firstName}{' '}
+                    {chat[getReceiver()]?.lastName}
+                  </div>
+                  <div className="chat__box__last-message">
+                    {chat.lastMessage?.userId === getUser()._id && (
+                      <span>Вы:</span>
+                    )}
+                    {chat.lastMessage?.type === 'text' &&
+                      chat.lastMessage?.text}
+                    {chat.lastMessage?.type === 'photo' && '📥 Photo'}
+                  </div>
+                </div>
+                <div className="chat__box__right">
+                  <div className="chat__box__time">
+                    {moment(chat.lastMessage?.createdAt).format('HH:mm')}
+                  </div>
+                  {!!getUnreadMessages(chat) && (
+                    <div className="chat__box__messages-count">
+                      {getUnreadMessages(chat)}
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="chat__box__right">
-                <div className="chat__box__time">18:37</div>
-                <div className="chat__box__messages-count">5</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </InfiniteScroll>
       </div>
     </div>
