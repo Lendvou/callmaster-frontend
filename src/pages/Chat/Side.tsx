@@ -113,7 +113,18 @@ const Side: React.FC<Props> = ({
           dataLength={chats.length}
           next={fetchNewChats}
           hasMore={hasMore}
-          loader={<ReactLoading type="bars" color="#69C262" width="40px" />}
+          loader={
+            chats.length === 0 ? (
+              <span />
+            ) : (
+              <ReactLoading
+                type="bars"
+                color="#69C262"
+                width="40px"
+                className="loading-center"
+              />
+            )
+          }
           scrollableTarget="scrollableContainer"
         >
           {sortedChats.map((chat) => {

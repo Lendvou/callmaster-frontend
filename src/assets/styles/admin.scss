@@ -1,0 +1,18 @@
+.admin {
+  width: 80%;
+  // height: 90%;
+  background-color: var(--chat-bg-color);
+  padding: 40px 60px;
+
+  &__title {
+    color: var(--color);
+    font-size: 26px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  &__signup {
+    // width: 30%;
+    width: 450px;
+  }
+}

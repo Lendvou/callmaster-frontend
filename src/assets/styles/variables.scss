@@ -8,23 +8,41 @@ body {
   --chat-bg-hover: #e7e7e7;
   --border-color: #18191a;
   --drawer-bg: white;
+  --your-comment: #419fd9;
+  --his-comment: white;
+  --your-comment-photo: white;
+  --his-comment-photo: white;
+  --chat-shadow: 0px 0px 30px 0px rgba(195, 199, 220, 0.26);
+  --input-bg: white;
+  --input-color: $gray;
+  --divider-bg: white;
+  --divider-color: $gray;
 }
 
 .dark {
   --primary: #1866b3;
-  --main-bg-color: #18191a;
+  --main-bg-color: #252627;
   --color: white;
   --border-color: white;
   --chat-bg-color: #18191a;
   --chat-bg-hover: #44474a;
   --drawer-bg: #18191a;
+  --your-comment: #2a2f33;
+  --his-comment: #33393f;
+  --your-comment-photo: #33393f;
+  --his-comment-photo: #33393f;
+  --chat-shadow: none;
+  --input-bg: var(--chat-bg-hover);
+  --input-color: white;
+  --divider-bg: var(--primary-dark);
+  --divider-color: white;
 }
 
 $black: #010101;
 $gray: #485a63;
 $light-gray: #99a8b1;
-$primary: #69c262;
-$primary-active: #1b9360;
+$primary: #419fd9;
+$primary-active: #2294f2;
 $primary-light: #e1f3e0;
 $yellow: #ffc01e;
 $pale: #f6f7fb;

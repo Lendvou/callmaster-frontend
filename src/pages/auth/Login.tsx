@@ -23,7 +23,7 @@ const Login = () => {
       });
       setAuthData({ user, accessToken });
 
-      history.push('/chat?from=client');
+      history.push('/chat');
     } catch (e) {
       return { [FORM_ERROR]: e.message };
     }
@@ -36,60 +36,52 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="auth-layout">
-      <div className="auth-layout__container">
-        <div className="auth-form">
-          <Form
-            onSubmit={onSubmit}
-            validate={validate}
-            render={({ handleSubmit, submitError, submitting }) => (
-              <form
-                className="auth-form auth-form--login"
-                onSubmit={handleSubmit}
-              >
-                <div className="auth-form__title">Вход</div>
+    <div className="auth-form">
+      <Form
+        onSubmit={onSubmit}
+        validate={validate}
+        render={({ handleSubmit, submitError, submitting }) => (
+          <form className="auth-form auth-form--login" onSubmit={handleSubmit}>
+            <div className="auth-form__title">Вход</div>
 
-                {submitError && (
-                  <div className="auth-form__error">{submitError}</div>
+            {submitError && (
+              <div className="auth-form__error">{submitError}</div>
+            )}
+
+            <div className="auth-form__fields">
+              <Field name="email">
+                {({ input, meta }) => (
+                  <FieldWithValidation meta={meta} errorText={meta.error}>
+                    <Input {...input} placeholder="Email" />
+                  </FieldWithValidation>
                 )}
+              </Field>
+              <Field name="password">
+                {({ input, meta }) => (
+                  <FieldWithValidation meta={meta} errorText={meta.error}>
+                    <Input.Password {...input} placeholder="Пароль" />
+                  </FieldWithValidation>
+                )}
+              </Field>
+            </div>
 
-                <div className="auth-form__fields">
-                  <Field name="email">
-                    {({ input, meta }) => (
-                      <FieldWithValidation meta={meta} errorText={meta.error}>
-                        <Input {...input} placeholder="Email" />
-                      </FieldWithValidation>
-                    )}
-                  </Field>
-                  <Field name="password">
-                    {({ input, meta }) => (
-                      <FieldWithValidation meta={meta} errorText={meta.error}>
-                        <Input.Password {...input} placeholder="Пароль" />
-                      </FieldWithValidation>
-                    )}
-                  </Field>
-                </div>
-
-                {/* <Link to="/forgot-password" className="auth-form__forgot">
+            {/* <Link to="/forgot-password" className="auth-form__forgot">
                   Забыли пароль?
                 </Link> */}
-                <Button
-                  className="auth-form__button"
-                  type="primary"
-                  htmlType="submit"
-                  loading={submitting}
-                >
-                  Войти
-                </Button>
-                <div className="auth-form__footer-text">
-                  Все ещё нет аккаунта?{' '}
-                  <Link to="/signup">Зарегистрироваться</Link>
-                </div>
-              </form>
-            )}
-          />
-        </div>
-      </div>
+            <Button
+              className="auth-form__button"
+              type="primary"
+              htmlType="submit"
+              loading={submitting}
+            >
+              Войти
+            </Button>
+            <div className="auth-form__footer-text">
+              Все ещё нет аккаунта? <Link to="/signup">Зарегистрироваться</Link>
+            </div>
+          </form>
+        )}
+      />
     </div>
   );
 };

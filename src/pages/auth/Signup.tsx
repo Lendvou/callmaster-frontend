@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Form, Field } from 'react-final-form';
-import { Button, Input } from 'antd';
+import { Button, Input, message } from 'antd';
 import { FORM_ERROR } from 'final-form';
+import clsx from 'clsx';
 
 import FieldWithValidation from 'components/FieldWithValidation';
 
@@ -11,8 +12,18 @@ import apiClient from 'utils/apiClient';
 
 import { ValidationErrorsObject } from 'types';
 
-const Signup = () => {
+type Props = {
+  title?: string;
+  isFromAdmin?: boolean;
+};
+
+const Signup: React.FC<Props> = ({
+  title = 'Регистрация',
+  isFromAdmin = false,
+}) => {
   const history = useHistory();
+
+  const [role, setRole] = useState<'client' | 'operator' | 'admin'>('client');
 
   const onSubmit = async (values: {
     email: string;
@@ -25,82 +36,107 @@ const Signup = () => {
       password: values.password,
       firstName: values.firstName,
       lastName: values.lastName,
-      role: 'client',
+      role,
     };
 
     try {
       await apiClient.service('users').create(data);
-      history.push('/login?from=client');
+      message.success('Пользователь успешно создан');
+      if (!isFromAdmin) {
+        history.push('/login');
+      }
     } catch (e) {
-      console.log('err', e);
+      console.error('signup err', e);
       return { [FORM_ERROR]: e.message };
     }
   };
 
   return (
-    <div className="auth-layout">
-      <div className="auth-layout__container">
-        <Form
-          onSubmit={onSubmit}
-          validate={validate}
-          render={({ handleSubmit, submitError, submitting }) => (
-            <form
-              className="auth-form auth-form--signup"
-              onSubmit={handleSubmit}
-            >
-              <div className="auth-form__title">Sign up</div>
+    <Form
+      onSubmit={onSubmit}
+      validate={validate}
+      render={({ handleSubmit, submitError, submitting }) => (
+        <form className="auth-form auth-form--signup" onSubmit={handleSubmit}>
+          <div className="auth-form__title">{title}</div>
 
-              {submitError && (
-                <div className="auth-form__error">{submitError}</div>
-              )}
+          {submitError && <div className="auth-form__error">{submitError}</div>}
 
-              <div className="auth-form__fields">
-                <Field name="firstName">
-                  {({ input, meta }) => (
-                    <FieldWithValidation meta={meta} errorText={meta.error}>
-                      <Input {...input} placeholder="Имя" />
-                    </FieldWithValidation>
-                  )}
-                </Field>
-                <Field name="lastName">
-                  {({ input, meta }) => (
-                    <FieldWithValidation meta={meta} errorText={meta.error}>
-                      <Input {...input} placeholder="Фамилия" />
-                    </FieldWithValidation>
-                  )}
-                </Field>
-                <Field name="email">
-                  {({ input, meta }) => (
-                    <FieldWithValidation meta={meta} errorText={meta.error}>
-                      <Input {...input} placeholder="Email" />
-                    </FieldWithValidation>
-                  )}
-                </Field>
-                <Field name="password">
-                  {({ input, meta }) => (
-                    <FieldWithValidation meta={meta} errorText={meta.error}>
-                      <Input.Password {...input} placeholder="Пароль" />
-                    </FieldWithValidation>
-                  )}
-                </Field>
-              </div>
-
-              <Button
-                className="auth-form__button"
-                type="primary"
-                htmlType="submit"
-                loading={submitting}
+          {isFromAdmin && (
+            <div className="auth-form__role">
+              <div
+                className={clsx('auth-form__role-item', {
+                  'auth-form__role-item--active': role === 'client',
+                })}
+                onClick={() => setRole('client')}
               >
-                Зарегистрироваться
-              </Button>
-              <div className="auth-form__footer-text">
-                Есть аккаунт? <Link to="/login">Войти</Link>
+                Клиент
               </div>
-            </form>
+              <div
+                className={clsx('auth-form__role-item', {
+                  'auth-form__role-item--active': role === 'operator',
+                })}
+                onClick={() => setRole('operator')}
+              >
+                Оператор
+              </div>
+              <div
+                className={clsx('auth-form__role-item', {
+                  'auth-form__role-item--active': role === 'admin',
+                })}
+                onClick={() => setRole('admin')}
+              >
+                Админ
+              </div>
+            </div>
           )}
-        />
-      </div>
-    </div>
+
+          <div className="auth-form__fields">
+            <Field name="firstName">
+              {({ input, meta }) => (
+                <FieldWithValidation meta={meta} errorText={meta.error}>
+                  <Input {...input} placeholder="Имя" />
+                </FieldWithValidation>
+              )}
+            </Field>
+            <Field name="lastName">
+              {({ input, meta }) => (
+                <FieldWithValidation meta={meta} errorText={meta.error}>
+                  <Input {...input} placeholder="Фамилия" />
+                </FieldWithValidation>
+              )}
+            </Field>
+            <Field name="email">
+              {({ input, meta }) => (
+                <FieldWithValidation meta={meta} errorText={meta.error}>
+                  <Input {...input} placeholder="Email" />
+                </FieldWithValidation>
+              )}
+            </Field>
+            <Field name="password">
+              {({ input, meta }) => (
+                <FieldWithValidation meta={meta} errorText={meta.error}>
+                  <Input.Password {...input} placeholder="Пароль" />
+                </FieldWithValidation>
+              )}
+            </Field>
+          </div>
+
+          <Button
+            className="auth-form__button"
+            type="primary"
+            htmlType="submit"
+            loading={submitting}
+          >
+            {isFromAdmin ? 'Добавить' : 'Зарегистрироваться'}
+          </Button>
+          {!isFromAdmin && (
+            <div className="auth-form__footer-text">
+              Есть аккаунт? <Link to="/login">Войти</Link>
+            </div>
+          )}
+        </form>
+      )}
+    />
   );
 };
 

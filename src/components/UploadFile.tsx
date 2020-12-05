@@ -57,12 +57,20 @@ const UploadFile: React.FC<Props> = ({ isVisible, onClose, onOk }) => {
     onClose();
   };
 
+  const onSendPhoto = () => {
+    setUploads([]);
+    onOk(uploads);
+  };
+
   return (
     <Modal
       visible={isVisible}
       onCancel={onCloseModal}
-      onOk={() => onOk(uploads)}
+      onOk={() => onSendPhoto()}
+      okText="Отправить"
+      cancelText="Отменить"
       centered
+      destroyOnClose
     >
       <Upload
         customRequest={uploadFile}

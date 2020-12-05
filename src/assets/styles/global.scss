@@ -54,12 +54,12 @@ body {
     top: 40px;
     transform: scale(2);
     cursor: pointer;
-    padding: 8px;
+    padding: 6px;
     border-radius: 100px;
     background-color: white;
     box-shadow: 0px 0px 30px 0px rgba(195, 199, 220, 0.6);
     svg {
-      width: 10px;
+      width: 9px;
       height: auto;
     }
     &:hover {
@@ -96,7 +96,8 @@ body {
 }
 
 .ant-input {
-  color: $gray !important;
+  color: $gray;
+  background-color: white;
   border-color: #ccd4d8;
   border-radius: 6px;
   padding: 6px 12px;
@@ -187,6 +188,7 @@ body {
   display: flex;
   flex-direction: column;
   &__title {
+    color: var(--color);
     font-size: 24px;
     // font-family: 'plex medium';
     text-align: center;
@@ -233,6 +235,7 @@ body {
   &__footer-text {
     font-size: 14px;
     text-align: center;
+    color: var(--color);
     a {
       // font-family: 'plex medium';
       color: var(--primary);
@@ -265,6 +268,30 @@ body {
       margin-bottom: 30px;
     }
   }
+
+  &__role {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  &__role-item {
+    padding: 4px 8px;
+    background-color: var(--chat-bg-hover);
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--color);
+    font-size: 15px;
+    &:not(:last-child) {
+      margin-right: 10px;
+    }
+    &:hover {
+      background-color: #cdecff;
+    }
+    &--active {
+      background-color: $primary !important;
+      color: white;
+    }
+  }
 }
 
 .drawer {
@@ -292,5 +319,63 @@ body {
     margin-left: 10px;
     width: 40px;
     height: auto;
+  }
+
+  &__bottom {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  &__list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  &__list-item {
+    margin-right: 10px;
+    font-size: 18px;
+    color: var(--color);
+    transition: color 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    &:hover {
+      color: $primary;
+    }
+    svg {
+      width: 20px;
+      margin-right: 10px;
+    }
+  }
+}
+
+.loading-center {
+  margin: 0 auto;
+}
+
+.notfound {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  h2 {
+    font-size: 76px;
+  }
+  p {
+    font-size: 26px;
+  }
+}
+
+.chat,
+.admin {
+  .ant-input,
+  .ant-input-password {
+    color: var(--input-color) !important;
+    background-color: var(--input-bg);
   }
 }

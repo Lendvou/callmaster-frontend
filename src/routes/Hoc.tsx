@@ -7,11 +7,13 @@ import { getUser, isUserAuth } from 'utils';
 type Props = {
   isProtected?: boolean;
   allowedRoles?: ('admin' | 'operator' | 'client')[];
+  layout?: React.FC<any>;
 } & RouteProps;
 
 const RouteHoc: React.FC<Props> = ({
   isProtected = false,
   allowedRoles,
+  layout: Layout,
   ...rest
 }) => {
   const user = getUser();
@@ -21,10 +23,17 @@ const RouteHoc: React.FC<Props> = ({
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Redirect to="/" />;
+    return <Redirect to="/404" />;
   }
 
-  return <Route {...rest} />;
+  if (!Layout) {
+    return <Route {...rest} />;
+  }
+  return (
+    <Layout>
+      <Route {...rest} />
+    </Layout>
+  );
 };
 
 export default RouteHoc;
