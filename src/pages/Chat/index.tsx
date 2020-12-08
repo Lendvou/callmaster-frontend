@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import querystring from 'query-string';
+import Peer from 'peerjs';
+import { Modal } from 'antd';
+import { useLocation } from 'react-router';
 
 import Side from './Side';
 import Body from './Body';
 
-import { IChat, IMessage, IUser } from 'types';
-import { useLocation } from 'react-router';
 import apiClient from 'utils/apiClient';
 import {
   getRandomInteger,
@@ -13,34 +14,31 @@ import {
   getUnreadMessagesKey,
   getUser,
 } from 'utils';
+
 import { Paginated } from '@feathersjs/feathers';
+import { IChat, IUser } from 'types';
 
 const Chat = () => {
   const { search } = useLocation();
 
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   const [chats, setChats] = useState<IChat[]>([]);
   const [activeChat, setActiveChat] = useState<Partial<IChat>>({});
+  const [currentCall, setCurrentCall] = useState<Peer.MediaConnection | null>(
+    null
+  );
+  const [isCallActive, setIsCallActive] = useState<boolean>(false);
 
-  // const patchLastMessage = (message: IMessage) => {
-  //   const newChats = chats.map((chat) => {
-  //     if (message.chatId === chat._id) {
-  //       return {
-  //         ...chat,
-  //         lastMessageId: message._id,
-  //         lastMessage: message,
-  //         lastMessageDate: message.createdAt,
-  //         unreadMessagesCount:
-  //           activeChat._id !== message.chatId
-  //             ? chat.unreadMessagesCount + 1
-  //             : chat.unreadMessagesCount,
-  //       };
-  //     }
-  //     return chat;
-  //   });
-  //   console.log('newchats', newChats);
+  const peer = useMemo(() => {
+    const user = getUser();
+    const myPeer = new Peer(user._id, {
+      host: '/',
+      port: 4000,
+    });
 
-  //   setChats(newChats);
-  // };
+    return myPeer;
+  }, []);
 
   const chatClicked = (chat: IChat) => {
     const newChats = chats.map((item) => {
@@ -56,6 +54,70 @@ const Chat = () => {
     setChats(newChats);
     setActiveChat(chat);
   };
+
+  const callUser = async () => {
+    if (!activeChat?._id) return;
+
+    const user = getUser();
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+
+    const otherId =
+      user.role === 'operator'
+        ? activeChat.client!._id
+        : activeChat.operator!._id;
+    const call = peer.call(otherId, stream);
+
+    call.on('stream', (userAudioStream) => {
+      const audioEl = audioRef.current;
+      addAudioStream(audioEl!, userAudioStream);
+      setCurrentCall(call);
+    });
+
+    call.on('close', () => {
+      console.log('caller onclose');
+
+      // call.close();
+      setCurrentCall(null);
+    });
+  };
+
+  useEffect(() => {
+    peer.on('call', async (call) => {
+      console.log('call', call);
+      const caller = await apiClient.service('users').get(call.peer);
+
+      Modal.confirm({
+        title: `${caller.firstName} ${caller.lastName} вам звонит, ответить?`,
+        centered: true,
+        okText: 'Да',
+        cancelText: 'Нет',
+        onOk: async () => {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+
+          call.answer(stream);
+          setIsCallActive(true);
+          setCurrentCall(call);
+
+          call.on('stream', (userAudioStream) => {
+            const audioEl = audioRef.current;
+            addAudioStream(audioEl!, userAudioStream);
+          });
+          call.on('close', () => {
+            console.log('callee onclose');
+            // call.close();
+            setCurrentCall(null);
+          });
+        },
+        onCancel: () => {
+          call.close();
+        },
+      });
+    });
+  }, [peer, activeChat, currentCall]);
 
   useEffect(() => {
     const parsedQuery = querystring.parse(search);
@@ -121,6 +183,8 @@ const Chat = () => {
 
   return (
     <div className="chat">
+      <audio ref={audioRef} />
+
       <Side
         chats={chats}
         activeChat={activeChat}
@@ -130,9 +194,49 @@ const Chat = () => {
       <Body
         activeChat={activeChat}
         onNewMessageAdded={() => console.log('jdjdjj')}
+        onCallUser={callUser}
+        isCallActive={isCallActive}
+        currentCall={currentCall}
       />
     </div>
   );
 };
+
+function addAudioStream(audio: HTMLAudioElement, stream: MediaStream) {
+  audio.srcObject = stream;
+  audio.addEventListener('loadedmetadata', () => {
+    audio.play();
+  });
+}
+
+function addVideoStream(video: HTMLVideoElement, stream: MediaStream) {
+  const vidos = document.getElementById('video-window') as HTMLVideoElement;
+
+  vidos.srcObject = stream;
+  vidos.addEventListener('loadedmetadata', () => {
+    vidos.play();
+  });
+  // const videoGrid = document.getElementById(
+  //   'video-container'
+  // ) as HTMLDivElement;
+
+  // video.srcObject = stream;
+  // video.addEventListener('loadedmetadata', () => {
+  //   console.log('video element', video, video.srcObject, stream);
+  //   video.play();
+  // });
+  // videoGrid.append(video);
+}
+
+// function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {
+//   const call = peer.call(userId, stream);
+//   const video = document.createElement('video');
+//   call.on('stream', (userVideoStream) => {
+//     addVideoStream(video, userVideoStream);
+//   });
+//   call.on('close', () => {
+//     video.remove();
+//   });
+// }
 
 export default Chat;

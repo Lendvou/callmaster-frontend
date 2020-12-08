@@ -7,8 +7,8 @@ export interface IChat {
   lastMessageDate: Date;
   clientUnreadMessages: number;
   operatorUnreadMessages: number;
-  client: Partial<IUser>;
-  operator: Partial<IUser>;
+  client: IUser;
+  operator: IUser;
   createdAt: Date;
   updatedAt: Date;
 }

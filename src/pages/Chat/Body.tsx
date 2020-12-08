@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Avatar, Divider, Input } from 'antd';
+import { Avatar, Divider, Input, Modal } from 'antd';
 import moment from 'moment';
 import clsx from 'clsx';
 import {
@@ -15,15 +15,26 @@ import { getReceiver, getUser } from 'utils';
 import { Paginated } from '@feathersjs/feathers';
 import { IChat, IMessage, IUpload } from 'types';
 import UploadFile from 'components/UploadFile';
+import Peer from 'peerjs';
 
 type Props = {
   activeChat: Partial<IChat>;
   onNewMessageAdded: (message: IMessage) => void;
+  onCallUser: () => void;
+  isCallActive: boolean;
+  currentCall: Peer.MediaConnection | null;
 };
 
-const Body: React.FC<Props> = ({ activeChat, onNewMessageAdded }) => {
+const Body: React.FC<Props> = ({
+  activeChat,
+  onNewMessageAdded,
+  onCallUser,
+  isCallActive,
+  currentCall,
+}) => {
   const inputRef = useRef<Input>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -172,7 +183,7 @@ const Body: React.FC<Props> = ({ activeChat, onNewMessageAdded }) => {
   }, [activeChat]);
 
   return (
-    <div className="chat__body">
+    <div className="chat__body" ref={containerRef} id="chatick">
       {activeChat?._id ? (
         <div className="chat__main">
           <div className="chat__navbar">
@@ -183,7 +194,14 @@ const Body: React.FC<Props> = ({ activeChat, onNewMessageAdded }) => {
                 {activeChat[getReceiver()]?.lastName}
               </div>
             </div>
-            <PhoneOutlined className="chat__navbar__phone" />
+
+            <PhoneOutlined
+              className={clsx('chat__navbar__phone', {
+                'chat__navbar__phone--close': !!currentCall,
+              })}
+              id="phone-button"
+              onClick={currentCall ? () => currentCall.close() : onCallUser}
+            />
           </div>
 
           <div

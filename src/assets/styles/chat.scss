@@ -1,4 +1,25 @@
+#video-container {
+  position: absolute;
+  top: 100px;
+  right: 20px;
+  width: 800px;
+  height: 400px;
+  background-color: white;
+  video {
+    width: 400px;
+    height: 400px;
+  }
+}
+#video-button {
+  position: absolute;
+  top: 80px;
+  right: -100px;
+  z-index: 1000000;
+  color: black;
+}
+
 .chat {
+  position: relative;
   width: 80%;
   height: 85%;
   // background-color: white;
@@ -163,6 +184,10 @@
       font-size: 16px;
     }
     &__phone {
+      background-color: $primary;
+      padding: 10px;
+      border-radius: 50px;
+
       margin-right: 20px;
       cursor: pointer;
       svg {
@@ -170,12 +195,25 @@
         height: auto;
       }
       path {
-        fill: $gray;
+        fill: white;
         transition: fill 0.2s;
       }
       &:hover {
+        background-color: $primary-active;
+      }
+
+      &--close {
+        background-color: $danger;
+        padding: 10px;
+        border-radius: 50px;
+        &:hover {
+          background-color: $danger-hover;
+          path {
+            fill: white;
+          }
+        }
         path {
-          fill: $black;
+          fill: white;
         }
       }
     }
