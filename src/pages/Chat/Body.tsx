@@ -1,25 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Avatar, Divider, Input, Modal } from 'antd';
+import { Avatar, Divider, Input } from 'antd';
 import moment from 'moment';
 import clsx from 'clsx';
-import {
-  CheckOutlined,
-  PhoneOutlined,
-  SendOutlined,
-  UploadOutlined,
-} from '@ant-design/icons';
+import { PhoneOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons';
+import Peer from 'peerjs';
+
+import UploadFile from 'components/UploadFile';
+import Message from './Message';
 
 import apiClient from 'utils/apiClient';
 import { getReceiver, getUser } from 'utils';
 
 import { Paginated } from '@feathersjs/feathers';
 import { IChat, IMessage, IUpload } from 'types';
-import UploadFile from 'components/UploadFile';
-import Peer from 'peerjs';
 
 type Props = {
   activeChat: Partial<IChat>;
-  onNewMessageAdded: (message: IMessage) => void;
   onCallUser: () => void;
   isCallActive: boolean;
   currentCall: Peer.MediaConnection | null;
@@ -27,7 +23,6 @@ type Props = {
 
 const Body: React.FC<Props> = ({
   activeChat,
-  onNewMessageAdded,
   onCallUser,
   isCallActive,
   currentCall,
@@ -138,13 +133,12 @@ const Body: React.FC<Props> = ({
       if (activeChat._id) {
         receiveMessage(message);
       }
-      onNewMessageAdded(message);
     });
 
     return () => {
       apiClient.service('messages').removeListener('created');
     };
-  }, [messages, activeChat, onNewMessageAdded]);
+  }, [messages, activeChat]);
 
   useEffect(() => {
     if (activeChat?._id) {
@@ -212,44 +206,7 @@ const Body: React.FC<Props> = ({
           >
             {messages.map((message, index) => (
               <div key={message._id}>
-                <div
-                  className={clsx('chat-message', {
-                    'chat-message--yours': message.userId === getUser()._id,
-                    'chat-message--his': message.userId !== getUser()._id,
-                  })}
-                >
-                  <div className="chat-message__wrapper">
-                    {message.type === 'text' && (
-                      <div className="chat-message__text">{message.text}</div>
-                    )}
-                    {message.type === 'photo' && (
-                      <div className="chat-message__photo">
-                        {message.photos.map((photo) => (
-                          <img
-                            key={photo._id}
-                            src={photo.path}
-                            alt="foto path"
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <div className="chat-message__info">
-                      <div className="chat-message__time">
-                        {moment(message.createdAt).format('HH:mm')}
-                      </div>
-                      <div className="chat-message__received">
-                        {message.isRead ? (
-                          <div className="chat-message__received-double">
-                            <CheckOutlined />
-                            <CheckOutlined />
-                          </div>
-                        ) : (
-                          <CheckOutlined />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <Message message={message} />
 
                 {checkIfDividerIsNeeded(message, index) && (
                   <Divider>

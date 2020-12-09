@@ -33,8 +33,9 @@ const Chat = () => {
   const peer = useMemo(() => {
     const user = getUser();
     const myPeer = new Peer(user._id, {
-      host: '/',
-      port: 4000,
+      host: 'localhost',
+      port: 3030,
+      path: '/peerjs',
     });
 
     return myPeer;
@@ -77,8 +78,6 @@ const Chat = () => {
 
     call.on('close', () => {
       console.log('caller onclose');
-
-      // call.close();
       setCurrentCall(null);
     });
   };
@@ -108,7 +107,6 @@ const Chat = () => {
           });
           call.on('close', () => {
             console.log('callee onclose');
-            // call.close();
             setCurrentCall(null);
           });
         },
@@ -193,7 +191,6 @@ const Chat = () => {
       />
       <Body
         activeChat={activeChat}
-        onNewMessageAdded={() => console.log('jdjdjj')}
         onCallUser={callUser}
         isCallActive={isCallActive}
         currentCall={currentCall}
