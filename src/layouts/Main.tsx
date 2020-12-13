@@ -4,24 +4,62 @@ import {
   LeftOutlined,
   LogoutOutlined,
   MenuOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
-
-import { getUser, setAuthData } from 'utils';
+import { Avatar, Drawer, message } from 'antd';
 import { useHistory } from 'react-router';
+import axios from 'axios';
+
+import { useDataContext } from 'DataContext';
+
+import { getToken, setAuthData } from 'utils';
 import apiClient from 'utils/apiClient';
-import { Drawer, message } from 'antd';
-import { Link } from 'react-router-dom';
 
 const Main: React.FC<any> = ({ children }) => {
   const history = useHistory();
 
-  const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
+  const { user, setUser } = useDataContext();
 
-  const user = getUser();
+  const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
 
   const goToPage = (page: string) => {
     setIsDrawerVisible(false);
     history.push(page);
+  };
+
+  const openFilePicker = () => {
+    const picker = document.createElement('input');
+    picker.type = 'file';
+    picker.onchange = onFileUpload;
+
+    picker.click();
+  };
+
+  const onFileUpload = async (event: any) => {
+    const token = getToken();
+
+    const file = event.target!.files![0];
+    const data = new FormData();
+    data.append('file', file);
+    try {
+      const response = (
+        await axios({
+          method: 'post',
+          url: process.env.REACT_APP_FILE_URL,
+          data,
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      ).data[0];
+
+      const result = await apiClient
+        .service('users')
+        .patch(user._id, { avatarId: response._id });
+
+      localStorage.setItem('user', JSON.stringify(result));
+      setUser(result);
+    } catch (e) {
+      console.error('Error while uploading avatar', e);
+    }
   };
 
   const logout = async () => {
@@ -65,33 +103,49 @@ const Main: React.FC<any> = ({ children }) => {
 
       <Drawer
         className="drawer"
-        title="Панель"
+        title="Настройки"
         placement="right"
         closable={false}
         onClose={() => setIsDrawerVisible(false)}
         visible={isDrawerVisible}
         width="15%"
       >
-        {user.role === 'admin' ? (
-          <div className="drawer__list">
-            <div
-              onClick={() => goToPage('/chat')}
-              className="drawer__list-item"
-            >
-              <MenuOutlined />
-              Чат
+        <div style={{ width: '100%' }}>
+          <div className="drawer__user-info">
+            <div onClick={() => openFilePicker()}>
+              <Avatar
+                key={user.avatar?.path}
+                src={user.avatar?.path}
+                icon={<UserOutlined />}
+                size={128}
+              />
             </div>
-            <div
-              onClick={() => goToPage('/admin')}
-              className="drawer__list-item"
-            >
-              <MenuOutlined />
-              Админ панель
+            <div className="drawer__user-name">
+              {user.firstName} {user.lastName}
             </div>
           </div>
-        ) : (
-          <div />
-        )}
+
+          {user.role === 'admin' ? (
+            <div className="drawer__list">
+              <div
+                onClick={() => goToPage('/chat')}
+                className="drawer__list-item"
+              >
+                <MenuOutlined />
+                Чат
+              </div>
+              <div
+                onClick={() => goToPage('/admin')}
+                className="drawer__list-item"
+              >
+                <MenuOutlined />
+                Админ панель
+              </div>
+            </div>
+          ) : (
+            <div />
+          )}
+        </div>
 
         <div className="drawer__bottom">
           <div className="drawer__color-mode">

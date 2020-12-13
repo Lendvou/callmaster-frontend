@@ -10,9 +10,11 @@ import { isUserAuth, isEmail, setAuthData } from 'utils';
 import apiClient from 'utils/apiClient';
 
 import { ValidationErrorsObject } from 'types';
+import { useDataContext } from 'DataContext';
 
 const Login = () => {
   const history = useHistory();
+  const { setUser } = useDataContext();
 
   const onSubmit = async (values: { email: string; password: string }) => {
     try {
@@ -22,6 +24,7 @@ const Login = () => {
         strategy: 'local',
       });
       setAuthData({ user, accessToken });
+      setUser(user);
 
       history.push('/chat');
     } catch (e) {

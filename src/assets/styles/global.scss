@@ -350,6 +350,35 @@ body {
       margin-right: 10px;
     }
   }
+
+  &__user-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+
+    .ant-avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $gray;
+      }
+
+      svg {
+        margin: 0;
+        transform: scale(1.2);
+      }
+    }
+  }
+  &__user-name {
+    font-size: 16px;
+    font-weight: 500;
+  }
 }
 
 .loading-center {
@@ -378,4 +407,10 @@ body {
     color: var(--input-color) !important;
     background-color: var(--input-bg);
   }
+}
+
+.ant-avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

@@ -47,7 +47,7 @@ export interface IUser {
   lastName: string;
   isOnline: boolean;
   avatarId: string;
-  avatar: IUpload;
+  avatar?: IUpload;
   createdAt: Date;
   updatedAt: Date;
 }

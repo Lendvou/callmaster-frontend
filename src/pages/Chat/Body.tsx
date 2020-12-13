@@ -2,7 +2,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Avatar, Divider, Input } from 'antd';
 import moment from 'moment';
 import clsx from 'clsx';
-import { PhoneOutlined, SendOutlined, UploadOutlined } from '@ant-design/icons';
+import {
+  PhoneOutlined,
+  SendOutlined,
+  UploadOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import Peer from 'peerjs';
 
 import UploadFile from 'components/UploadFile';
@@ -13,6 +18,8 @@ import { getReceiver, getUser } from 'utils';
 
 import { Paginated } from '@feathersjs/feathers';
 import { IChat, IMessage, IUpload } from 'types';
+import userEvent from '@testing-library/user-event';
+import { useDataContext } from 'DataContext';
 
 type Props = {
   activeChat: Partial<IChat>;
@@ -30,6 +37,8 @@ const Body: React.FC<Props> = ({
   const inputRef = useRef<Input>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const { user } = useDataContext();
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -182,7 +191,11 @@ const Body: React.FC<Props> = ({
         <div className="chat__main">
           <div className="chat__navbar">
             <div className="chat__navbar__left">
-              <Avatar className="chat__navbar__avatar" />
+              <Avatar
+                src={activeChat[getReceiver()]?.avatar?.path}
+                className="chat__navbar__avatar"
+                icon={<UserOutlined />}
+              />
               <div className="chat__navbar__name">
                 {activeChat[getReceiver()]?.firstName}{' '}
                 {activeChat[getReceiver()]?.lastName}

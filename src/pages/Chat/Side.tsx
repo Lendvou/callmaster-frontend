@@ -1,14 +1,16 @@
+import { UserOutlined } from '@ant-design/icons';
 import { Paginated } from '@feathersjs/feathers';
 import { Input } from 'antd';
 import Avatar from 'antd/lib/avatar/avatar';
 import clsx from 'clsx';
+import { useDataContext } from 'DataContext';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ReactLoading from 'react-loading';
 
 import { IChat } from 'types';
-import { getReceiver, getUser } from 'utils';
+import { getReceiver } from 'utils';
 import apiClient from 'utils/apiClient';
 
 type Props = {
@@ -24,6 +26,8 @@ const Side: React.FC<Props> = ({
   setChats,
   onChatClick,
 }) => {
+  const { user } = useDataContext();
+
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
 
@@ -50,13 +54,12 @@ const Side: React.FC<Props> = ({
 
   const getUnreadMessages = (chat: IChat) =>
     chat[
-      (getUser().role + 'UnreadMessages') as
+      (user.role + 'UnreadMessages') as
         | 'clientUnreadMessages'
         | 'operatorUnreadMessages'
     ];
 
   const fetchNewChats = async () => {
-    const user = getUser();
     const field = user.role === 'client' ? 'clientId' : 'operatorId';
 
     const response: Paginated<IChat> = await apiClient.service('chats').find({
@@ -78,7 +81,6 @@ const Side: React.FC<Props> = ({
 
   useEffect(() => {
     const fetchChats = async () => {
-      const user = getUser();
       const field = user.role === 'client' ? 'clientId' : 'operatorId';
 
       const response: Paginated<IChat> = await apiClient.service('chats').find({
@@ -100,7 +102,7 @@ const Side: React.FC<Props> = ({
   return (
     <div className="chat__side">
       <div className="chat__side-search">
-        <Avatar src={getUser().avatar?.path} />
+        <Avatar src={user.avatar?.path} icon={<UserOutlined />} />
         <Input
           placeholder="Поиск"
           value={search}
@@ -137,7 +139,10 @@ const Side: React.FC<Props> = ({
                 onClick={() => onChatClick(chat)}
               >
                 <div className="chat__box__left">
-                  <Avatar src={chat[getReceiver()]?.avatar?.path} />
+                  <Avatar
+                    src={chat[getReceiver()]?.avatar?.path}
+                    icon={<UserOutlined />}
+                  />
                 </div>
                 <div className="chat__box__center">
                   <div className="chat__box__name">
@@ -145,9 +150,7 @@ const Side: React.FC<Props> = ({
                     {chat[getReceiver()]?.lastName}
                   </div>
                   <div className="chat__box__last-message">
-                    {chat.lastMessage?.userId === getUser()._id && (
-                      <span>Вы:</span>
-                    )}
+                    {chat.lastMessage?.userId === user._id && <span>Вы:</span>}
                     {chat.lastMessage?.type === 'text' &&
                       chat.lastMessage?.text}
                     {chat.lastMessage?.type === 'photo' && '📥 Photo'}

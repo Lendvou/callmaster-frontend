@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import ReactLoading from 'react-loading';
 
 import Routes from 'routes';
+import DataContextProvider from 'DataContext';
 
 import { setAuthData } from 'utils';
 import apiClient from 'utils/apiClient';
@@ -35,7 +36,9 @@ function App() {
     </div>
   ) : (
     <div className="App">
-      <Routes />
+      <DataContextProvider>
+        <Routes />
+      </DataContextProvider>
     </div>
   );
 }
