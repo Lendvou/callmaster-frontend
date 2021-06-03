@@ -3,10 +3,9 @@ import { Modal, Upload } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
-import { getToken } from 'utils';
-
 import { RcCustomRequestOptions } from 'antd/lib/upload/interface';
 import { IUpload } from 'types';
+import { useTypedSelector } from 'store';
 
 type Props = {
   isVisible: boolean;
@@ -15,6 +14,8 @@ type Props = {
 };
 
 const UploadFile: React.FC<Props> = ({ isVisible, onClose, onOk }) => {
+  const token = useTypedSelector((state) => state.user.token);
+
   const [uploads, setUploads] = useState<IUpload[]>([]);
 
   const photos = useMemo(() => {
@@ -29,7 +30,6 @@ const UploadFile: React.FC<Props> = ({ isVisible, onClose, onOk }) => {
 
   const uploadFile = async (fileInfo: RcCustomRequestOptions) => {
     console.log('args', fileInfo);
-    const token = getToken();
 
     const file = fileInfo.file;
     const data = new FormData();

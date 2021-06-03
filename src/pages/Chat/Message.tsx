@@ -3,26 +3,25 @@ import clsx from 'clsx';
 import moment from 'moment';
 import { CheckOutlined } from '@ant-design/icons';
 
-import { getUser } from 'utils';
-
 import { IMessage } from 'types';
+import { useTypedSelector } from 'store';
 
 type Props = {
   message: IMessage;
 };
 
 const Message: React.FC<Props> = ({ message }) => {
+  const user = useTypedSelector((state) => state.user.user);
+
   return (
     <div
       className={clsx('chat-message', {
-        'chat-message--yours': message.userId === getUser()._id,
-        'chat-message--his': message.userId !== getUser()._id,
+        'chat-message--yours': message.userId === user._id,
+        'chat-message--his': message.userId !== user._id,
       })}
     >
       <div className="chat-message__wrapper">
-        {message.type === 'text' && (
-          <div className="chat-message__text">{message.text}</div>
-        )}
+        {message.type === 'text' && <div className="chat-message__text">{message.text}</div>}
         {message.type === 'photo' && (
           <div className="chat-message__photo">
             {message.photos.map((photo) => (
@@ -32,9 +31,7 @@ const Message: React.FC<Props> = ({ message }) => {
         )}
 
         <div className="chat-message__info">
-          <div className="chat-message__time">
-            {moment(message.createdAt).format('HH:mm')}
-          </div>
+          <div className="chat-message__time">{moment(message.createdAt).format('HH:mm')}</div>
           <div className="chat-message__received">
             {message.isRead ? (
               <div className="chat-message__received-double">

@@ -10,15 +10,14 @@ import { Avatar, Drawer, message } from 'antd';
 import { useHistory } from 'react-router';
 import axios from 'axios';
 
-import { useDataContext } from 'DataContext';
-
-import { getToken, setAuthData } from 'utils';
-import apiClient from 'utils/apiClient';
+import { useTypedDispatch, useTypedSelector } from 'store';
+import { logOut, patchUser } from 'store/user/thunkActions';
 
 const Main: React.FC<any> = ({ children }) => {
   const history = useHistory();
+  const dispatch = useTypedDispatch();
 
-  const { user, setUser } = useDataContext();
+  const { user, token } = useTypedSelector((state) => state.user);
 
   const [isDrawerVisible, setIsDrawerVisible] = useState<boolean>(false);
 
@@ -36,11 +35,10 @@ const Main: React.FC<any> = ({ children }) => {
   };
 
   const onFileUpload = async (event: any) => {
-    const token = getToken();
-
     const file = event.target!.files![0];
     const data = new FormData();
     data.append('file', file);
+
     try {
       const response = (
         await axios({
@@ -51,12 +49,7 @@ const Main: React.FC<any> = ({ children }) => {
         })
       ).data[0];
 
-      const result = await apiClient
-        .service('users')
-        .patch(user._id, { avatarId: response._id });
-
-      localStorage.setItem('user', JSON.stringify(result));
-      setUser(result);
+      await dispatch(patchUser({ avatarId: response._id }));
     } catch (e) {
       console.error('Error while uploading avatar', e);
     }
@@ -64,8 +57,7 @@ const Main: React.FC<any> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await apiClient.logout();
-      setAuthData(null);
+      await dispatch(logOut());
       history.push('/login');
     } catch (e) {
       message.error('Не удалось разлогиниться', 4);
@@ -96,10 +88,7 @@ const Main: React.FC<any> = ({ children }) => {
 
   return (
     <div className="main">
-      <LeftOutlined
-        className="main__settings-icon"
-        onClick={() => setIsDrawerVisible(true)}
-      />
+      <LeftOutlined className="main__settings-icon" onClick={() => setIsDrawerVisible(true)} />
 
       <Drawer
         className="drawer"
@@ -127,17 +116,11 @@ const Main: React.FC<any> = ({ children }) => {
 
           {user.role === 'admin' ? (
             <div className="drawer__list">
-              <div
-                onClick={() => goToPage('/chat')}
-                className="drawer__list-item"
-              >
+              <div onClick={() => goToPage('/chat')} className="drawer__list-item">
                 <MenuOutlined />
                 Чат
               </div>
-              <div
-                onClick={() => goToPage('/admin')}
-                className="drawer__list-item"
-              >
+              <div onClick={() => goToPage('/admin')} className="drawer__list-item">
                 <MenuOutlined />
                 Админ панель
               </div>

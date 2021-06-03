@@ -2,25 +2,24 @@ import React, { useEffect, useState } from 'react';
 import ReactLoading from 'react-loading';
 
 import Routes from 'routes';
-import DataContextProvider from 'DataContext';
 
-import { setAuthData } from 'utils';
-import apiClient from 'utils/apiClient';
+import store from 'store';
+import { checkIsUserAuth } from 'store/user/thunkActions';
 
 import 'antd/dist/antd.css';
 import 'assets/styles/index.scss';
+import { Provider } from 'react-redux';
+import { initPeer } from 'store/core/thunkActions';
 
 function App() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const checkIsAuth = async () => {
       try {
-        const { accessToken, user } = await apiClient.reAuthenticate();
-
-        setAuthData({ user, accessToken });
+        await store.dispatch(checkIsUserAuth());
+        store.dispatch(initPeer());
       } catch (e) {
-        setAuthData(null);
         console.error('WHAT THE HELL YOU ARE NOT AUTHENTICATed', e);
       } finally {
         setIsLoading(false);
@@ -35,11 +34,11 @@ function App() {
       <ReactLoading type="bars" color="#69C262" />
     </div>
   ) : (
-    <div className="App">
-      <DataContextProvider>
+    <Provider store={store}>
+      <div className="App">
         <Routes />
-      </DataContextProvider>
-    </div>
+      </div>
+    </Provider>
   );
 }
 

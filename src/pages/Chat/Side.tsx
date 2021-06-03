@@ -1,17 +1,18 @@
 import { UserOutlined } from '@ant-design/icons';
-import { Paginated } from '@feathersjs/feathers';
 import { Input } from 'antd';
 import Avatar from 'antd/lib/avatar/avatar';
 import clsx from 'clsx';
-import { useDataContext } from 'DataContext';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ReactLoading from 'react-loading';
+import { useTypedSelector } from 'store';
 
-import { IChat } from 'types';
 import { getReceiver } from 'utils';
 import apiClient from 'utils/apiClient';
+
+import { Paginated } from '@feathersjs/feathers';
+import { IChat } from 'types';
 
 type Props = {
   chats: IChat[];
@@ -20,44 +21,31 @@ type Props = {
   onChatClick: (chat: IChat) => void;
 };
 
-const Side: React.FC<Props> = ({
-  chats,
-  activeChat,
-  setChats,
-  onChatClick,
-}) => {
-  const { user } = useDataContext();
+const Side: React.FC<Props> = ({ chats, activeChat, setChats, onChatClick }) => {
+  const user = useTypedSelector((state) => state.user.user);
 
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
 
   const filteredChats = useMemo(() => {
     if (!search) return chats;
-    return chats.filter(
-      (chat) =>
-        chat[getReceiver()]?.firstName
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        chat[getReceiver()]?.lastName
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
-    );
+    return chats.filter((chat) => {
+      const receiver = chat[getReceiver(user)];
+      return (
+        receiver?.firstName?.toLowerCase().includes(search.toLowerCase()) ||
+        receiver?.lastName?.toLowerCase().includes(search.toLowerCase())
+      );
+    });
   }, [search, chats]);
 
   const sortedChats = useMemo(() => {
     return filteredChats.sort(
-      (a, b) =>
-        new Date(b.lastMessageDate).getTime() -
-        new Date(a.lastMessageDate).getTime()
+      (a, b) => new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime()
     );
   }, [filteredChats]);
 
   const getUnreadMessages = (chat: IChat) =>
-    chat[
-      (user.role + 'UnreadMessages') as
-        | 'clientUnreadMessages'
-        | 'operatorUnreadMessages'
-    ];
+    chat[(user.role + 'UnreadMessages') as 'clientUnreadMessages' | 'operatorUnreadMessages'];
 
   const fetchNewChats = async () => {
     const field = user.role === 'client' ? 'clientId' : 'operatorId';
@@ -103,11 +91,7 @@ const Side: React.FC<Props> = ({
     <div className="chat__side">
       <div className="chat__side-search">
         <Avatar src={user.avatar?.path} icon={<UserOutlined />} />
-        <Input
-          placeholder="Поиск"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <Input placeholder="Поиск" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
       <h2 className="chat__title">Чаты</h2>
       <div className="chat__side-items" id="scrollableContainer">
@@ -119,12 +103,7 @@ const Side: React.FC<Props> = ({
             chats.length === 0 ? (
               <span />
             ) : (
-              <ReactLoading
-                type="bars"
-                color="#69C262"
-                width="40px"
-                className="loading-center"
-              />
+              <ReactLoading type="bars" color="#69C262" width="40px" className="loading-center" />
             )
           }
           scrollableTarget="scrollableContainer"
@@ -139,20 +118,15 @@ const Side: React.FC<Props> = ({
                 onClick={() => onChatClick(chat)}
               >
                 <div className="chat__box__left">
-                  <Avatar
-                    src={chat[getReceiver()]?.avatar?.path}
-                    icon={<UserOutlined />}
-                  />
+                  <Avatar src={chat[getReceiver(user)]?.avatar?.path} icon={<UserOutlined />} />
                 </div>
                 <div className="chat__box__center">
                   <div className="chat__box__name">
-                    {chat[getReceiver()]?.firstName}{' '}
-                    {chat[getReceiver()]?.lastName}
+                    {chat[getReceiver(user)]?.firstName} {chat[getReceiver(user)]?.lastName}
                   </div>
                   <div className="chat__box__last-message">
                     {chat.lastMessage?.userId === user._id && <span>Вы:</span>}
-                    {chat.lastMessage?.type === 'text' &&
-                      chat.lastMessage?.text}
+                    {chat.lastMessage?.type === 'text' && chat.lastMessage?.text}
                     {chat.lastMessage?.type === 'photo' && '📥 Photo'}
                   </div>
                 </div>
@@ -161,9 +135,7 @@ const Side: React.FC<Props> = ({
                     {moment(chat.lastMessage?.createdAt).format('HH:mm')}
                   </div>
                   {!!getUnreadMessages(chat) && (
-                    <div className="chat__box__messages-count">
-                      {getUnreadMessages(chat)}
-                    </div>
+                    <div className="chat__box__messages-count">{getUnreadMessages(chat)}</div>
                   )}
                 </div>
               </div>

@@ -2,24 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Avatar, Divider, Input } from 'antd';
 import moment from 'moment';
 import clsx from 'clsx';
-import {
-  PhoneOutlined,
-  SendOutlined,
-  UploadOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { PhoneOutlined, SendOutlined, UploadOutlined, UserOutlined } from '@ant-design/icons';
 import Peer from 'peerjs';
 
 import UploadFile from 'components/UploadFile';
 import Message from './Message';
 
 import apiClient from 'utils/apiClient';
-import { getReceiver, getUser } from 'utils';
+import { getReceiver } from 'utils';
 
 import { Paginated } from '@feathersjs/feathers';
 import { IChat, IMessage, IUpload } from 'types';
-import userEvent from '@testing-library/user-event';
-import { useDataContext } from 'DataContext';
+import { useTypedSelector } from 'store';
 
 type Props = {
   activeChat: Partial<IChat>;
@@ -28,17 +22,12 @@ type Props = {
   currentCall: Peer.MediaConnection | null;
 };
 
-const Body: React.FC<Props> = ({
-  activeChat,
-  onCallUser,
-  isCallActive,
-  currentCall,
-}) => {
+const Body: React.FC<Props> = ({ activeChat, onCallUser, isCallActive, currentCall }) => {
   const inputRef = useRef<Input>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { user } = useDataContext();
+  const user = useTypedSelector((state) => state.user.user);
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -54,9 +43,7 @@ const Body: React.FC<Props> = ({
       $read: true,
     };
 
-    const result: Paginated<IMessage> = await apiClient
-      .service('messages')
-      .find({ query });
+    const result: Paginated<IMessage> = await apiClient.service('messages').find({ query });
 
     const newMessages = result.data.reverse().concat(messages);
     setMessages(newMessages);
@@ -68,7 +55,6 @@ const Body: React.FC<Props> = ({
 
   const sendMessage = async () => {
     if (!inputVal) return;
-    const user = getUser();
 
     const data = {
       text: inputVal,
@@ -93,21 +79,14 @@ const Body: React.FC<Props> = ({
     }
   };
 
-  const checkIfDividerIsNeeded = (
-    message: IMessage,
-    index: number
-  ): boolean => {
+  const checkIfDividerIsNeeded = (message: IMessage, index: number): boolean => {
     return (
       !!messages[index + 1] &&
-      !moment(messages[index + 1].createdAt).isSame(
-        moment(message.createdAt),
-        'day'
-      )
+      !moment(messages[index + 1].createdAt).isSame(moment(message.createdAt), 'day')
     );
   };
 
   const createPhotoMessage = async (uploads: IUpload[]) => {
-    const user = getUser();
     try {
       await apiClient.service('messages').create({
         type: 'photo',
@@ -124,11 +103,9 @@ const Body: React.FC<Props> = ({
 
   useEffect(() => {
     const receiveMessage = (message: IMessage) => {
-      const user = getUser();
       const container = listRef.current;
       const shouldScroll: boolean =
-        container!.scrollTop + container!.clientHeight ===
-        container!.scrollHeight;
+        container!.scrollTop + container!.clientHeight === container!.scrollHeight;
 
       const newMessages = messages.concat(message);
       setMessages(newMessages);
@@ -159,11 +136,9 @@ const Body: React.FC<Props> = ({
           $sort: { createdAt: -1 },
           $read: true,
         };
-        const result: Paginated<IMessage> = await apiClient
-          .service('messages')
-          .find({ query });
+        const result: Paginated<IMessage> = await apiClient.service('messages').find({ query });
 
-        console.log('messages', result);
+        console.info('messages', result);
         const newMessages = result.data.reverse();
         setMessages(newMessages);
         setHasMore(true);
@@ -192,13 +167,12 @@ const Body: React.FC<Props> = ({
           <div className="chat__navbar">
             <div className="chat__navbar__left">
               <Avatar
-                src={activeChat[getReceiver()]?.avatar?.path}
+                src={activeChat[getReceiver(user)]?.avatar?.path}
                 className="chat__navbar__avatar"
                 icon={<UserOutlined />}
               />
               <div className="chat__navbar__name">
-                {activeChat[getReceiver()]?.firstName}{' '}
-                {activeChat[getReceiver()]?.lastName}
+                {activeChat[getReceiver(user)]?.firstName} {activeChat[getReceiver(user)]?.lastName}
               </div>
             </div>
 
@@ -211,20 +185,13 @@ const Body: React.FC<Props> = ({
             />
           </div>
 
-          <div
-            className="chat__list"
-            ref={listRef}
-            id="scrollableList"
-            onScroll={onListScroll}
-          >
+          <div className="chat__list" ref={listRef} id="scrollableList" onScroll={onListScroll}>
             {messages.map((message, index) => (
               <div key={message._id}>
                 <Message message={message} />
 
                 {checkIfDividerIsNeeded(message, index) && (
-                  <Divider>
-                    {moment(messages[index + 1].createdAt).format('DD.MM.YYYY')}
-                  </Divider>
+                  <Divider>{moment(messages[index + 1].createdAt).format('DD.MM.YYYY')}</Divider>
                 )}
               </div>
             ))}
@@ -242,10 +209,7 @@ const Body: React.FC<Props> = ({
               onChange={(e) => setInputVal(e.target.value)}
               onPressEnter={() => sendMessage()}
             />
-            <SendOutlined
-              className="chat__input-send"
-              onClick={() => sendMessage()}
-            />
+            <SendOutlined className="chat__input-send" onClick={() => sendMessage()} />
           </div>
         </div>
       ) : (

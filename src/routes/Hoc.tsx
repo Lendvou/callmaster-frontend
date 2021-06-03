@@ -1,8 +1,7 @@
 import React from 'react';
 import { Route, RouteProps } from 'react-router';
 import { Redirect } from 'react-router-dom';
-
-import { getUser, isUserAuth } from 'utils';
+import { useTypedSelector } from 'store';
 
 type Props = {
   isProtected?: boolean;
@@ -16,13 +15,13 @@ const RouteHoc: React.FC<Props> = ({
   layout: Layout,
   ...rest
 }) => {
-  const user = getUser();
+  const { user, isAuth } = useTypedSelector((state) => state.user);
 
-  if (isProtected && !isUserAuth()) {
+  if (isProtected && !isAuth) {
     return <Redirect to="/login" />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.role!)) {
     return <Redirect to="/404" />;
   }
 

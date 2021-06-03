@@ -6,25 +6,23 @@ import { FORM_ERROR } from 'final-form';
 
 import FieldWithValidation from 'components/FieldWithValidation';
 
-import { isUserAuth, isEmail, setAuthData } from 'utils';
-import apiClient from 'utils/apiClient';
+import { isEmail } from 'utils';
 
 import { ValidationErrorsObject } from 'types';
-import { useDataContext } from 'DataContext';
+import { useTypedDispatch, useTypedSelector } from 'store';
+import { logIn, LoginValues } from 'store/user/thunkActions';
+import { initPeer } from 'store/core/thunkActions';
 
 const Login = () => {
   const history = useHistory();
-  const { setUser } = useDataContext();
+  const dispatch = useTypedDispatch();
 
-  const onSubmit = async (values: { email: string; password: string }) => {
+  const { isAuth } = useTypedSelector((state) => state.user);
+
+  const onSubmit = async (values: LoginValues) => {
     try {
-      const { accessToken, user } = await apiClient.authenticate({
-        email: values.email,
-        password: values.password,
-        strategy: 'local',
-      });
-      setAuthData({ user, accessToken });
-      setUser(user);
+      await dispatch(logIn({ email: values.email, password: values.password }));
+      dispatch(initPeer());
 
       history.push('/chat');
     } catch (e) {
@@ -33,7 +31,7 @@ const Login = () => {
   };
 
   useEffect(() => {
-    if (isUserAuth()) {
+    if (isAuth) {
       history.push('/');
     }
   }, []);
@@ -47,9 +45,7 @@ const Login = () => {
           <form className="auth-form auth-form--login" onSubmit={handleSubmit}>
             <div className="auth-form__title">Вход</div>
 
-            {submitError && (
-              <div className="auth-form__error">{submitError}</div>
-            )}
+            {submitError && <div className="auth-form__error">{submitError}</div>}
 
             <div className="auth-form__fields">
               <Field name="email">

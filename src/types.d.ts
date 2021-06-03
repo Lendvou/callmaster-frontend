@@ -2,7 +2,6 @@ export interface IChat {
   _id: string;
   clientId: string;
   operatorId: string;
-  lastMessageId: string;
   lastMessage: Message;
   lastMessageDate: Date;
   clientUnreadMessages: number;
@@ -53,7 +52,5 @@ export interface IUser {
 }
 
 export type ValidationErrorsObject<FormItem> = {
-  [P in keyof FormItem]?: FormItem[P] extends object
-    ? ValidationErrorsObject<FormItem[P]>
-    : string;
+  [P in keyof FormItem]?: FormItem[P] extends object ? ValidationErrorsObject<FormItem[P]> : string;
 };
