@@ -90,7 +90,7 @@ const Chat = () => {
             addAudioStream(audioEl!, userAudioStream);
           });
           call.on('close', () => {
-            console.log('callee onclose');
+            console.info('callee onclose');
             setCurrentCall(null);
             setIsCallActive(false);
           });
@@ -199,32 +199,4 @@ function addAudioStream(audio: HTMLAudioElement, stream: MediaStream) {
   });
 }
 
-function addVideoStream(video: HTMLVideoElement, stream: MediaStream) {
-  const vidos = document.getElementById('video-window') as HTMLVideoElement;
-
-  vidos.srcObject = stream;
-  vidos.addEventListener('loadedmetadata', () => {
-    vidos.play();
-  });
-  // const videoGrid = document.getElementById(
-  //   'video-container'
-  // ) as HTMLDivElement;
-
-  // video.srcObject = stream;
-  // video.addEventListener('loadedmetadata', () => {
-  //   console.log('video element', video, video.srcObject, stream);
-  //   video.play();
-  // });
-  // videoGrid.append(video);
-}
-
-// function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {
-//   const call = peer.call(userId, stream);
-//   const video = document.createElement('video');
-//   call.on('stream', (userVideoStream) => {
-//     addVideoStream(video, userVideoStream);
-//   });
-//   call.on('close', () => {
-//     video.remove();
-//   });
-// }
+export default Chat;

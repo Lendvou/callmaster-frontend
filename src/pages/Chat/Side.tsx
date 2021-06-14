@@ -29,20 +29,27 @@ const Side: React.FC<Props> = ({ chats, activeChat, setChats, onChatClick }) => 
 
   const filteredChats = useMemo(() => {
     if (!search) return chats;
-    return chats.filter((chat) => {
+
+    const filtered = chats.filter((chat) => {
       const receiver = chat[getReceiver(user)];
       return (
         receiver?.firstName?.toLowerCase().includes(search.toLowerCase()) ||
         receiver?.lastName?.toLowerCase().includes(search.toLowerCase())
       );
     });
-  }, [search, chats]);
 
-  const sortedChats = useMemo(() => {
-    return filteredChats.sort(
+    return filtered.sort(
       (a, b) => new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime()
     );
-  }, [filteredChats]);
+  }, [search, chats, user]);
+
+  // const sortedChats = useMemo(() => {
+  //   console.log('');
+
+  //   return filteredChats.sort(
+  //     (a, b) => new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime()
+  //   );
+  // }, [filteredChats]);
 
   const getUnreadMessages = (chat: IChat) =>
     chat[(user.role + 'UnreadMessages') as 'clientUnreadMessages' | 'operatorUnreadMessages'];
@@ -56,6 +63,7 @@ const Side: React.FC<Props> = ({ chats, activeChat, setChats, onChatClick }) => 
         $limit: 15,
         $skip: chats.length,
         $search: search || undefined,
+        $sort: { lastMessageDate: -1 },
       },
     });
 
@@ -76,6 +84,7 @@ const Side: React.FC<Props> = ({ chats, activeChat, setChats, onChatClick }) => 
           [field]: user._id,
           $limit: 15,
           $skip: 0,
+          $sort: { lastMessageDate: -1 },
         },
       });
 
@@ -108,7 +117,7 @@ const Side: React.FC<Props> = ({ chats, activeChat, setChats, onChatClick }) => 
           }
           scrollableTarget="scrollableContainer"
         >
-          {sortedChats.map((chat) => {
+          {filteredChats.map((chat) => {
             return (
               <div
                 key={chat._id}
@@ -122,7 +131,8 @@ const Side: React.FC<Props> = ({ chats, activeChat, setChats, onChatClick }) => 
                 </div>
                 <div className="chat__box__center">
                   <div className="chat__box__name">
-                    {chat[getReceiver(user)]?.firstName} {chat[getReceiver(user)]?.lastName}
+                    {/* {chat[getReceiver(user)]?.firstName} {chat[getReceiver(user)]?.lastName} */}
+                    Клиент {chat.client?.num || '-'}
                   </div>
                   <div className="chat__box__last-message">
                     {chat.lastMessage?.userId === user._id && <span>Вы:</span>}
@@ -132,7 +142,7 @@ const Side: React.FC<Props> = ({ chats, activeChat, setChats, onChatClick }) => 
                 </div>
                 <div className="chat__box__right">
                   <div className="chat__box__time">
-                    {moment(chat.lastMessage?.createdAt).format('HH:mm')}
+                    {chat.lastMessageDate ? moment(chat.lastMessageDate).format('HH:mm') : ''}
                   </div>
                   {!!getUnreadMessages(chat) && (
                     <div className="chat__box__messages-count">{getUnreadMessages(chat)}</div>

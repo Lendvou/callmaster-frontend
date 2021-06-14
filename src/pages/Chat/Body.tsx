@@ -116,6 +116,8 @@ const Body: React.FC<Props> = ({ activeChat, onCallUser, isCallActive, currentCa
     };
 
     apiClient.service('messages').on('created', (message: IMessage) => {
+      console.log('receive messsssssss', message);
+
       if (activeChat._id) {
         receiveMessage(message);
       }
@@ -172,7 +174,8 @@ const Body: React.FC<Props> = ({ activeChat, onCallUser, isCallActive, currentCa
                 icon={<UserOutlined />}
               />
               <div className="chat__navbar__name">
-                {activeChat[getReceiver(user)]?.firstName} {activeChat[getReceiver(user)]?.lastName}
+                {/* {activeChat[getReceiver(user)]?.firstName} {activeChat[getReceiver(user)]?.lastName} */}
+                Клиент {activeChat.client?.num || '-'}
               </div>
             </div>
 

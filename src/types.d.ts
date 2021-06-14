@@ -49,6 +49,7 @@ export interface IUser {
   avatar?: IUpload;
   createdAt: Date;
   updatedAt: Date;
+  num?: number;
 }
 
 export type ValidationErrorsObject<FormItem> = {
