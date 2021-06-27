@@ -49,7 +49,9 @@ const Chat = () => {
       audio: true,
     });
 
-    const otherId = user.role === 'operator' ? activeChat.client!._id : activeChat.operator!._id;
+    const otherId = ['operator', 'admin'].includes(user.role)
+      ? activeChat.client!._id
+      : activeChat.operator!._id;
     const call = peer.call(otherId, stream);
 
     call.on('stream', (userAudioStream) => {
@@ -72,7 +74,7 @@ const Chat = () => {
       // const caller = await apiClient.service('users').get(call.peer);
 
       Modal.confirm({
-        title: `${caller.firstName} ${caller.lastName} вам звонит, ответить?`,
+        title: `Клиент ${caller.num} вам звонит, ответить?`,
         centered: true,
         okText: 'Да',
         cancelText: 'Нет',
