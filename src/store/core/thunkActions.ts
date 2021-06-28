@@ -11,6 +11,7 @@ export const initPeer = (): AppThunk => async (dispatch, getState) => {
     host: process.env.REACT_APP_IP || 'localhost',
     port: 80,
     path: process.env.REACT_APP_PEERJS_PATH || '/peerjs',
+    secure: false,
   });
 
   dispatch(setPeer(myPeer));
